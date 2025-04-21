@@ -27,6 +27,9 @@ class preprocess(object):
         if parser.dataset == 'nuscenes_pred':
             label_path = os.path.join(data_root, 'label/{}/{}.txt'.format(split, seq_name))
             delimiter = ' '
+        elif parser.dataset == 'waymo_pred':
+            label_path = os.path.join(data_root, 'label/{}/{}.txt'.format(split, seq_name))
+            delimiter = ' '
         elif parser.dataset in {'eth', 'hotel', 'univ', 'zara1', 'zara2'}:
             label_path = f'{data_root}/{parser.dataset}/{seq_name}.txt'
             delimiter = ' '
@@ -166,11 +169,14 @@ class preprocess(object):
         if self.dataset == 'nuscenes_pred':
             pred_mask = self.get_pred_mask(pre_data[0], valid_id)
             heading = self.get_heading(pre_data[0], valid_id)
+        elif self.dataset == 'waymo_pred':
+            pred_mask = self.get_pred_mask(pre_data[0], valid_id)
+            heading = self.get_heading(pre_data[0], valid_id)
         else:
             pred_mask = None
             heading = None
 
-        pre_motion_3D, pre_motion_mask = self.PreMotion(pre_data, valid_id)
+        pre_motion_3D, pre_motion_mask = self.(pre_data, valid_id)
         fut_motion_3D, fut_motion_mask = self.FutureMotion(fut_data, valid_id)
 
         data = {
