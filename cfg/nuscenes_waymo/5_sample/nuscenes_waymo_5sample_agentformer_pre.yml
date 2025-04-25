@@ -1,22 +1,24 @@
 # ------------------- General Options -------------------------
 
 description                  : AgentFormer (Before DLow)
-results_root_dir             : results
+results_root_dir             : ../results/agentformer
 seed                         : 1
-dataset                      : nuscenes_pred
+dataset                      : nuscenes_waymo_pred
 data_root_ethucy             : datasets/eth_ucy
 data_root_nuscenes_pred      : datasets/nuscenes_pred
+data_root_nuscenes_waymo_pred: datasets/merged_nuscenes_waymo
+data_root_waymo_pred         : /scratch/rksing18/stpp/waymo/sampled_processed
 load_map                     : true
 map_version                  : 0.1
 
 # ------------------- Feature Extractor -------------------------
 
-past_frames                  : 4
-future_frames                : 12
+past_frames                  : 10
+future_frames                : 80
 min_past_frames              : 2
 min_future_frames            : 12
 
-traj_scale                   : 20
+traj_scale                   : 10
 motion_dim                   : 2
 forecast_dim                 : 2
 
@@ -59,7 +61,7 @@ future_encoder:
 # ------------------- VAE-------------------------
 
 nz                           : 32
-sample_k                     : 10
+sample_k                     : 5
 learn_prior                  : true
 
 # ------------------- Training Parameters -------------------------
@@ -73,7 +75,7 @@ loss_cfg:
     min_clip: 2.0
   sample:
     weight: 1.0
-    k: 10
+    k: 5
 
 num_epochs                   : 100
 lr_fix_epochs                : 10

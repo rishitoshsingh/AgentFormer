@@ -3,29 +3,31 @@
 description                  : AgentFormer (DLow)
 results_root_dir             : ../results/agentformer
 seed                         : 1 
-dataset                      : waymo_pred
+dataset                      : nuscenes_waymo_pred
 data_root_ethucy             : datasets/eth_ucy
 data_root_nuscenes_pred      : datasets/nuscenes_pred
-data_root_nuscenes_waymo_pred: datasets/merged_nuscenes_waymo
+# data_root_nuscenes_waymo_pred: datasets/merged_nuscenes_waymo
+# data_root_nuscenes_waymo_pred: datasets/merged_nuscenes_waymo2
+data_root_nuscenes_waymo_pred: datasets/merged_nuscenes_waymo4
 data_root_waymo_pred         : /scratch/rksing18/stpp/waymo/sampled_processed
 load_map                     : true
 map_version                  : 0.1
 
 # ------------------- Feature Extractor -------------------------
 
-past_frames                  : 10
-future_frames                : 80
+past_frames                  : 4
+future_frames                : 12
 min_past_frames              : 2
 min_future_frames            : 12
 
-traj_scale                   : 10
+traj_scale                   : 20
 motion_dim                   : 2
 forecast_dim                 : 2
 
 # ------------------- Model -------------------------
 model_id: dlow
-pred_cfg: waymo_5sample_agentformer_pre
-pred_epoch: 100
+pred_cfg: nuscenes_10sample_agentformer_pre
+pred_epoch: 90
 qnet_mlp: [512, 256]
 share_eps: true
 train_w_mean: true
@@ -33,7 +35,7 @@ train_w_mean: true
 # ------------------- VAE-------------------------
 
 nz                           : 32
-sample_k                     : 5
+sample_k                     : 10
 
 # ------------------- Training Parameters -------------------------
 
@@ -44,7 +46,7 @@ loss_cfg:
     min_clip: 10
   diverse:
     weight: 1
-    d_scale: 2
+    d_scale: 1
   recon:
     weight: 5.0
 

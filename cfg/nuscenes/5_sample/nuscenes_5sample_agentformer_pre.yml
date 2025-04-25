@@ -1,7 +1,7 @@
 # ------------------- General Options -------------------------
 
 description                  : AgentFormer (Before DLow)
-results_root_dir             : results
+results_root_dir             : ../results/agentformer/
 seed                         : 10
 dataset                      : nuscenes_pred
 data_root_ethucy             : datasets/eth_ucy

@@ -26,6 +26,10 @@ class data_generator(object):
             data_root = parser.data_root_waymo_pred
             seq_train, seq_val, seq_test = get_waymo_pred_split(data_root)
             self.init_frame = 0
+        elif parser.dataset == 'nuscenes_waymo_pred':
+            data_root = parser.data_root_nuscenes_waymo_pred
+            seq_train, seq_val, seq_test = get_waymo_pred_split(data_root)
+            self.init_frame = 0
         elif parser.dataset in {'eth', 'hotel', 'univ', 'zara1', 'zara2'}:
             data_root = parser.data_root_ethucy            
             seq_train, seq_val, seq_test = get_ethucy_split(parser.dataset)

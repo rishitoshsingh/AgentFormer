@@ -512,6 +512,7 @@ class AgentFormer(nn.Module):
             in_data = data
 
         self.data = defaultdict(lambda: None)
+        self.data['seq_name'] = data['seq_name']
         self.data['batch_size'] = len(in_data['pre_motion_3D'])
         self.data['agent_num'] = len(in_data['pre_motion_3D'])
         self.data['pre_motion'] = torch.stack(in_data['pre_motion_3D'], dim=0).to(device).transpose(0, 1).contiguous()
@@ -556,12 +557,24 @@ class AgentFormer(nn.Module):
             scene_points = np.stack(in_data['pre_motion_3D'])[:, -1] * data['traj_scale']
             if self.map_global_rot:
                 patch_size = [50, 50, 50, 50]
+                # patch_size = [20, 20, 20, 20]
                 rot = theta.repeat(self.data['agent_num']).cpu().numpy() * (180 / np.pi)
             else:
                 patch_size = [50, 10, 50, 90]
+                # patch_size = [20, 10, 20, 30]
                 rot = -np.array(in_data['heading'])  * (180 / np.pi)
+            # try:
+                # print("seq: ", self.data['seq_name'])
+                # print("heading: ", in_data['heading'])
+                # print("rotation: ", rot)
+                # print("sc_points: ", scene_points)
             self.data['agent_maps'] = scene_map.get_cropped_maps(scene_points, patch_size, rot).to(device)
-
+            # except:
+            #     print(self.data['seq_name'])
+            #     print(in_data['heading'])
+            #     print(rot)
+            #     print(scene_points)
+            #     raise
         # agent shuffling
         if self.training and self.ctx['agent_enc_shuffle']:
             self.data['agent_enc_shuffle'] = torch.randperm(self.ctx['max_agent_len'])[:self.data['agent_num']].to(device)

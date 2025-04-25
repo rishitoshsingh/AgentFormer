@@ -1,12 +1,13 @@
 # ------------------- General Options -------------------------
 
 description                  : AgentFormer (Before DLow)
-results_root_dir             : results
+results_root_dir             : ../results/agentformer
 seed                         : 10
 dataset                      : waymo_pred
 data_root_ethucy             : datasets/eth_ucy
 data_root_nuscenes_pred      : datasets/nuscenes_pred
-data_root_waymo_pred         : ../waymo/datasets/waymo_pred
+data_root_nuscenes_waymo_pred: datasets/merged_nuscenes_waymo
+data_root_waymo_pred         : /scratch/rksing18/stpp/waymo/sampled_processed
 load_map                     : true
 map_version                  : 0.1
 

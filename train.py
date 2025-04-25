@@ -1,3 +1,6 @@
+import wandb
+from datetime import datetime  # Add this import
+
 import os
 import sys
 import argparse
@@ -25,6 +28,8 @@ def logging(cfg, epoch, total_epoch, iter, total_iter, ep, seq, frame, losses_st
 		'EP: {:s}, ETA: {:s}, seq {:s}, frame {:05d}, {}'
         .format(cfg, epoch, total_epoch, iter, total_iter, \
 		convert_secs2time(ep), convert_secs2time(ep / iter * (total_iter * (total_epoch - epoch) - iter)), seq, frame, losses_str), log)
+	# Log epoch-level metrics to wandb
+	wandb.log({"epoch": epoch, "ETA": convert_secs2time(ep / iter * (total_iter * (total_epoch - epoch) - iter))})
 
 
 def train(epoch):
@@ -54,8 +59,10 @@ def train(epoch):
             ep = time.time() - since_train
             losses_str = ' '.join([f'{x}: {y.avg:.3f} ({y.val:.3f})' for x, y in train_loss_meter.items()])
             logging(args.cfg, epoch, cfg.num_epochs, generator.index, generator.num_total_samples, ep, seq, frame, losses_str, log)
-            for name, meter in train_loss_meter.items():
-                tb_logger.add_scalar('model_' + name, meter.avg, tb_ind)
+            
+            # Log metrics to wandb
+            wandb.log({f"train/{name}": meter.avg for name, meter in train_loss_meter.items()})
+            wandb.log({"train/step": tb_ind})
             tb_ind += 1
             last_generator_index = generator.index
 
@@ -73,6 +80,14 @@ if __name__ == '__main__':
 
     """ setup """
     cfg = Config(args.cfg, args.tmp, create_dirs=True)
+    wandb.init(
+        project="AgentFormer",  # Replace with your project name
+        config=cfg,              # Log your configuration
+        name="run_nuscenes_waymo_10sample_agentformer_pre_2025-04-24_20-39-28",
+        # name=f"run_{args.cfg}_{datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d_%H-%M-%S')}"   # Fixed: Convert time to datetime
+        resume="allow",          # Set to True if you want to resume a previous run
+    )
+
     prepare_seed(cfg.seed)
     torch.set_default_dtype(torch.float32)
     device = torch.device('cuda', index=args.gpu) if torch.cuda.is_available() else torch.device('cpu')
@@ -107,13 +122,15 @@ if __name__ == '__main__':
         print_log(f'loading model from checkpoint: {cp_path}', log)
         model_cp = torch.load(cp_path, map_location='cpu')
         model.load_state_dict(model_cp['model_dict'])
+        # Fix of script crashing when loading model from n cp
+        model.set_device(device)
         if 'opt_dict' in model_cp:
             optimizer.load_state_dict(model_cp['opt_dict'])
         if 'scheduler_dict' in model_cp:
             scheduler.load_state_dict(model_cp['scheduler_dict'])
-
+    else:
+        model.set_device(device)
     """ start training """
-    model.set_device(device)
     model.train()
     for i in range(args.start_epoch, cfg.num_epochs):
         train(i)
@@ -122,4 +139,8 @@ if __name__ == '__main__':
             cp_path = cfg.model_path % (i + 1)
             model_cp = {'model_dict': model.state_dict(), 'opt_dict': optimizer.state_dict(), 'scheduler_dict': scheduler.state_dict(), 'epoch': i + 1}
             torch.save(model_cp, cp_path)
+            # Log checkpoint as a wandb artifact
+            artifact = wandb.Artifact('model_checkpoint', type='model')
+            artifact.add_file(cp_path)
+            wandb.log_artifact(artifact)
 

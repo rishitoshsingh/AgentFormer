@@ -30,11 +30,21 @@ class preprocess(object):
         elif parser.dataset == 'waymo_pred':
             label_path = os.path.join(data_root, 'label/{}/{}.txt'.format(split, seq_name))
             delimiter = ' '
+        elif parser.dataset == 'nuscenes_waymo_pred':
+            label_path = os.path.join(data_root, 'label/{}/{}.txt'.format(split, seq_name))
+            delimiter = ' '
         elif parser.dataset in {'eth', 'hotel', 'univ', 'zara1', 'zara2'}:
             label_path = f'{data_root}/{parser.dataset}/{seq_name}.txt'
             delimiter = ' '
         else:
             assert False, 'error'
+
+        # Extract ID from seq_name and check for alphabets
+        seq_id = self.seq_name.split('-')[-1]
+        if any(char.isalpha() for char in seq_id):
+            self.is_waymo = True
+        else:
+            self.is_waymo = False
 
         self.gt = np.genfromtxt(label_path, delimiter=delimiter, dtype=str)
         frames = self.gt[:, 0].astype(np.float32).astype(np.int)
@@ -69,7 +79,7 @@ class preprocess(object):
         for i in range(self.past_frames):
             if frame - i < self.init_frame:              
                 data = []
-            data = self.gt[self.gt[:, 0] == (frame - i * self.frame_skip)]    
+            data = self.gt[self.gt[:, 0] == (frame - i * self.frame_skip)]  
             DataList.append(data)
         return DataList
     
@@ -106,7 +116,10 @@ class preprocess(object):
         map_file = f'{self.data_root}/map_{self.map_version}/{self.seq_name}.png'
         map_vis_file = f'{self.data_root}/map_{self.map_version}/vis_{self.seq_name}.png'
         map_meta_file = f'{self.data_root}/map_{self.map_version}/meta_{self.seq_name}.txt'
-        self.scene_map = np.transpose(cv2.imread(map_file), (2, 0, 1))
+        if self.is_waymo:
+            self.scene_map = np.transpose(cv2.imread(map_file), (2, 1, 0))
+        else:
+            self.scene_map = np.transpose(cv2.imread(map_file), (2, 0, 1))
         self.scene_vis_map = np.transpose(cv2.cvtColor(cv2.imread(map_vis_file), cv2.COLOR_BGR2RGB), (2, 0, 1))
         self.meta = np.loadtxt(map_meta_file)
         self.map_origin = self.meta[:2]
@@ -172,6 +185,9 @@ class preprocess(object):
         elif self.dataset == 'waymo_pred':
             pred_mask = self.get_pred_mask(pre_data[0], valid_id)
             heading = self.get_heading(pre_data[0], valid_id)
+        elif self.dataset == 'nuscenes_waymo_pred':
+            pred_mask = self.get_pred_mask(pre_data[0], valid_id)
+            heading = self.get_heading(pre_data[0], valid_id)
         else:
             pred_mask = None
             heading = None
@@ -180,6 +196,8 @@ class preprocess(object):
         fut_motion_3D, fut_motion_mask = self.FutureMotion(fut_data, valid_id)
 
         data = {
+            'seq_name': self.seq_name,
+            'is_waymo': self.is_waymo,
             'pre_motion_3D': pre_motion_3D,
             'fut_motion_3D': fut_motion_3D,
             'fut_motion_mask': fut_motion_mask,
