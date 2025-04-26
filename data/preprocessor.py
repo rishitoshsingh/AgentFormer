@@ -36,6 +36,9 @@ class preprocess(object):
         elif parser.dataset in {'eth', 'hotel', 'univ', 'zara1', 'zara2'}:
             label_path = f'{data_root}/{parser.dataset}/{seq_name}.txt'
             delimiter = ' '
+        elif parser.dataset in {'eth_stanford', 'hotel_stanford', 'univ_stanford', 'zara1_stanford', 'zara2_stanford'}:
+            label_path = f'{data_root}/{parser.dataset}/{seq_name}.txt'
+            delimiter = ' '
         else:
             assert False, 'error'
 

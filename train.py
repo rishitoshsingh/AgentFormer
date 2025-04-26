@@ -83,9 +83,8 @@ if __name__ == '__main__':
     wandb.init(
         project="AgentFormer",  # Replace with your project name
         config=cfg,              # Log your configuration
-        name="run_nuscenes_waymo_10sample_agentformer_pre_2025-04-24_20-39-28",
-        # name=f"run_{args.cfg}_{datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d_%H-%M-%S')}"   # Fixed: Convert time to datetime
-        resume="allow",          # Set to True if you want to resume a previous run
+        name=f"run_{args.cfg}_{datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d_%H-%M-%S')}",   # Fixed: Convert time to datetime
+        # resume="must",          # Set to True if you want to resume a previous run
     )
 
     prepare_seed(cfg.seed)

@@ -4,6 +4,7 @@ import os, random, numpy as np, copy
 
 from .preprocessor import preprocess
 from .ethucy_split import get_ethucy_split
+from .ethucy_stanford_split import get_ethucy_stanford_split
 from utils.utils import print_log
 
 
@@ -33,6 +34,10 @@ class data_generator(object):
         elif parser.dataset in {'eth', 'hotel', 'univ', 'zara1', 'zara2'}:
             data_root = parser.data_root_ethucy            
             seq_train, seq_val, seq_test = get_ethucy_split(parser.dataset)
+            self.init_frame = 0
+        elif parser.dataset in {'eth_stanford', 'hotel_stanford', 'univ_stanford', 'zara1_stanford', 'zara2_stanford'}:
+            data_root = parser.data_root_ethucy_stanford
+            seq_train, seq_val, seq_test = get_ethucy_stanford_split(parser.dataset)            
             self.init_frame = 0
         else:
             raise ValueError('Unknown dataset!')
